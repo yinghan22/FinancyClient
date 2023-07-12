@@ -24,12 +24,24 @@
         <tr>
           <td>
             <el-form-item label="隶属工作职责编码">
-              <el-input v-model="form['job_resp_id']"></el-input>
+              <el-select v-model="form['job_resp_id']" filterable>
+                <el-option
+                    v-for="item in store.getters['job_list']"
+                    :label="item.code"
+                    :value="item.id"
+                ></el-option>
+              </el-select>
             </el-form-item>
           </td>
           <td>
             <el-form-item label="绩效编码">
-              <el-input v-model="form['per_goal_id']"></el-input>
+              <el-select v-model="form['per_goal_id']" filterable>
+                <el-option
+                    v-for="item in store.getters['goal_list']"
+                    :label="item.code"
+                    :value="item.id"
+                ></el-option>
+              </el-select>
             </el-form-item>
           </td>
         </tr>
@@ -62,11 +74,7 @@
           </tr>
           <tr>
             <td>
-              <el-form-item
-                  label="申请人"
-                  prop="requester"
-                  required
-              >
+              <el-form-item label="申请人" prop="requester" required>
                 <el-input v-model="form['requester_name']" readonly></el-input>
               </el-form-item>
             </td>
@@ -83,7 +91,7 @@
             </td>
           </tr>
           <tr>
-            <el-form-item label="审批状态" prop="status" required>
+            <el-form-item label="审批状态" required>
               <el-select v-model="form['status']" filterable @change="status_change">
                 <el-option v-for="(item,index) in store.getters['approve_status_list']" :label="item"
                            :value="index"></el-option>
@@ -112,15 +120,14 @@
 </template>
 
 <script lang="ts" setup>
-import type {FormInstance, FormRules} from 'element-plus';
-import {ElMessage} from 'element-plus';
-import {reactive, ref} from 'vue';
-import $$ from '../../../axios';
-import {useStore} from 'vuex';
-import now_datetime from '../../../utils/now.js';
+import type {FormInstance, FormRules} from 'element-plus'
+import {ElMessage} from 'element-plus'
+import {reactive, ref} from 'vue'
+import $$ from '../../../axios'
+import {useStore} from 'vuex'
+import now_datetime from '../../../utils/now.js'
 
-const store = useStore();
-
+const store = useStore()
 const props = defineProps({
   form: {
     type: Object,
@@ -135,6 +142,7 @@ const props = defineProps({
       comm: '',
       status: 0,
       requester: '',
+      requester_name: '',
       applicant_id: '',
       refuse_reason: '',
     },
@@ -145,76 +153,76 @@ const props = defineProps({
     default: () => {
     },
   },
-});
-
-const status = props.form.status;
-let request_time = false;
-let approve_time = null;
+})
+console.log(props.form.requester)
+const status = props.form.status
+let request_time = false
+let approve_time = null
 
 const status_change = (e) => {
   if (status === 0 && e === 1) {
-    request_time = true;
+    request_time = true
   } else if (status === 1 && e !== 0 && e !== 1) {
-    approve_time = true;
+    approve_time = true
   }
-};
+}
 
-const form_ref = ref<FormInstance>();
+const form_ref = ref<FormInstance>()
 const create_rules = reactive<FormRules>({
   name: [{required: true, message: '请输入计划名称', trigger: 'blur'}],
-});
+})
 
 const update_data = (form_el: FormInstance | undefined) => {
   form_el.validate(valid => {
     if (valid) {
-      store.commit('loading', true);
-      let form_data = new FormData();
+      store.commit('loading', true)
+      let form_data = new FormData()
       {
-        form_data.set('name', props.form.name);
-        form_data.set('detail', props.form.detail);
-        form_data.set('job_resp_id', props.form.job_resp_id);
-        form_data.set('per_goal_id', props.form.per_goal_id);
-        form_data.set('carry_out', props.form.carry_out);
-        form_data.set('comm', props.form.comm);
+        form_data.set('name', props.form.name)
+        form_data.set('detail', props.form.detail)
+        form_data.set('job_resp_id', props.form.job_resp_id)
+        form_data.set('per_goal_id', props.form.per_goal_id)
+        form_data.set('carry_out', props.form.carry_out)
+        form_data.set('comm', props.form.comm)
 
-        form_data.set('status', JSON.stringify(props.form.status));
-        form_data.set('requester', props.form.requester);
-        form_data.set('applicant_id', props.form.applicant_id);
-        form_data.set('refuse_reason', props.form.refuse_reason);
+        form_data.set('status', JSON.stringify(props.form.status))
+        form_data.set('requester', props.form.requester)
+        form_data.set('applicant_id', props.form.applicant_id)
+        form_data.set('refuse_reason', props.form.refuse_reason)
 
         if (request_time) {
-          form_data.set('request_time', now_datetime());
+          form_data.set('request_time', now_datetime())
         }
         if (approve_time) {
-          form_data.set('approve_time', now_datetime());
+          form_data.set('approve_time', now_datetime())
         }
       }
       $$.put(`/awp/${props.form.code}`, form_data)
           .then(res => {
-            store.commit('loading', false);
+            store.commit('loading', false)
             if (res.data.status === 200) {
               ElMessage({
                 type: 'success',
                 message: '修改成功',
-              });
-              props.success();
+              })
+              props.success()
             } else {
               ElMessage({
                 type: 'error',
                 message: res.data.message,
-              });
+              })
             }
           })
           .catch(res => {
-            store.commit('loading', false);
+            store.commit('loading', false)
             ElMessage({
               type: 'error',
               message: res,
-            });
-          });
+            })
+          })
     }
-  });
-};
+  })
+}
 </script>
 
 <style lang="scss" scoped>

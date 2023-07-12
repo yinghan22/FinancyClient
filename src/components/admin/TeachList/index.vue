@@ -86,7 +86,7 @@ const create_visible = ref(false);
 const dept_list = ref([]);
 
 if (dept_list.value.length == 0) {
-  $$.get('/dept/-1').then(res => {
+  $$.get('/dept').then(res => {
     dept_list.value = res.data.data;
   });
 }
@@ -99,7 +99,7 @@ const page_to = (index) => {
 };
 
 function get_data(curr_page) {
-  const url = `/teach/-1?reverse=1&current_page=${curr_page}&page_size=${page_info.page_size}`;
+  const url = `/teach?reverse=1&current_page=${curr_page}&page_size=${page_info.page_size}`;
   store.commit('loading', true);
   $$.get(url)
       .then(res => {

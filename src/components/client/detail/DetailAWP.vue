@@ -33,12 +33,12 @@
         <tr>
           <td>
             <el-form-item label="隶属工作职责编码">
-              <el-input v-model="props.data['job_resp_id']" readonly></el-input>
+              <el-input v-model="props.data['job_resp_code']" readonly></el-input>
             </el-form-item>
           </td>
           <td>
             <el-form-item label="绩效编码">
-              <el-input v-model="props.data['per_goal_id']" readonly></el-input>
+              <el-input v-model="props.data['per_goal_code']" readonly></el-input>
             </el-form-item>
           </td>
         </tr>
@@ -65,14 +65,24 @@
           <tr>
             <td>
               <el-form-item label="部门">
-                <el-input v-model="props.data['dept_name']" readonly></el-input>
+                <el-select v-model="props.data['dept_id']" disabled filterable>
+                  <el-option
+                      :label="props.data['dept_name']"
+                      :value="props.data['dept_id']"
+                  ></el-option>
+                </el-select>
               </el-form-item>
             </td>
           </tr>
           <tr>
             <td>
               <el-form-item label="申请人">
-                <el-input v-model="props.data['requester_name']" readonly></el-input>
+                <el-select v-model="props.data['requester']" disabled filterable>
+                  <el-option
+                      :label="props.data['requester'] + ' - ' + props.data['requester_name']"
+                      :value="props.data['requester']"
+                  ></el-option>
+                </el-select>
               </el-form-item>
             </td>
           </tr>
@@ -80,8 +90,10 @@
             <td>
               <el-form-item label="审核小组">
                 <el-select v-model="props.data['applicant_id']" disabled filterable>
-                  <el-option v-for="item in store.getters['expert_group']" :label="item['tag']"
-                             :value="item['id']">
+                  <el-option
+                      :label=" props.data['applicant_id'] + ' - ' + props.data['applicant_tag']"
+                      :value="props.data['applicant_id']"
+                  >
                   </el-option>
                 </el-select>
               </el-form-item>
@@ -101,12 +113,12 @@
 </template>
 
 <script lang="ts" setup>
-import {useStore} from 'vuex';
+import {useStore} from 'vuex'
 
-const store = useStore();
+const store = useStore()
 const props = defineProps({
   data: Object,
-});
+})
 </script>
 
 <style lang="scss" scoped>

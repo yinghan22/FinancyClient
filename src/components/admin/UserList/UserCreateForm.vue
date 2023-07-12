@@ -8,11 +8,14 @@
     </el-form-item>
     <el-form-item label="类型" prop="usertype" required>
       <el-select v-model="form.usertype" filterable>
-        <el-option v-for="(item,index) in usertype_map" :label="item" :value="index"></el-option>
+        <el-option v-for="(item,index) in props.usertype_map" :label="item" :value="index"></el-option>
       </el-select>
     </el-form-item>
     <el-form-item label="密码" prop="password" required>
       <el-input v-model.trim="form.password" type="password"></el-input>
+    </el-form-item>
+    <el-form-item label="确认密码" prop="confirm" required>
+      <el-input v-model.trim="form.confirm" type="password"></el-input>
     </el-form-item>
     <el-form-item label="职务" prop="job_title" required>
       <el-input v-model.trim="form.job_title"></el-input>
@@ -22,7 +25,7 @@
     </el-form-item>
     <el-form-item label="部门" prop="dept_id" required>
       <el-select v-model="form.dept_id" filterable>
-        <el-option v-for="item in dept_list" :label="item.name" :value="item.id"></el-option>
+        <el-option v-for="item in props.dept_list" :label="item.name" :value="item.id"></el-option>
       </el-select>
     </el-form-item>
     <el-form-item label="备注">
@@ -56,6 +59,7 @@ const form = reactive({
   id: '',
   name: '',
   password: '',
+  confirm: '',
   usertype: '',
   pro_title: '',
   job_title: '',
@@ -70,6 +74,8 @@ const create_rules = reactive<FormRules>({
   name: [{required: true, message: '请输入姓名', trigger: 'blur'}],
   password: [{required: true, trigger: 'blur', message: '请输入密码'},
     {min: 6, message: '密码长度不少于6位', trigger: 'blur'}],
+  confirm: [{required: true, trigger: 'blur', message: '请输入密码'},
+    {validator:(rule, value, callback, source, options)=>{let __value__ = value.trim();if (__value__!=form.password) callback('密码不一致，请重新确认密码');else callback();      },trigger:'blur'}],
   usertype: [{required: true, message: '请选择用户类型', trigger: 'change'}],
   job_title: [{required: true, message: '请输入职务', trigger: 'blur'}],
   dept_id: [{required: true, message: '请选择任职部门', trigger: 'change'}],
@@ -84,6 +90,7 @@ const create_data = (form_el: FormInstance | undefined) => {
         form_data.set('id', form.id);
         form_data.set('name', form.name);
         form_data.set('password', form.password);
+        form_data.set('confirm', form.confirm);
         form_data.set('usertype', form.usertype);
         form_data.set('job_title', form.job_title);
         form_data.set('pro_title', form.pro_title);

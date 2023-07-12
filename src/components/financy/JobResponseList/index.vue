@@ -74,60 +74,60 @@
 </template>
 
 <script lang="ts" setup>
-import {reactive, ref} from 'vue';
-import Card from '../../Card.vue';
-import {ElMessage} from 'element-plus';
-import $$ from '../../../axios';
-import {useStore} from 'vuex';
+import {reactive, ref} from 'vue'
+import Card from '../../Card.vue'
+import {ElMessage} from 'element-plus'
+import $$ from '../../../axios'
+import {useStore} from 'vuex'
 
-const store = useStore();
-const data_list = ref([]);
+const store = useStore()
+const data_list = ref([])
 const page_info = reactive({
   curr_page: 1,
   total: 10,
   page_size: 14,
-});
+})
 
-const dept_list = ref([]);
+const dept_list = ref([])
 
 if (dept_list.value.length == 0) {
-  $$.get('/dept/-1').then(res => {
-    dept_list.value = res.data.data;
-  });
+  $$.get('/dept').then(res => {
+    dept_list.value = res.data.data
+  })
 }
 
 const page_to = (curr_page) => {
-  get_data(curr_page);
-};
-
-if (data_list.value.length === 0) {
-  get_data(1);
+  get_data(curr_page)
 }
 
-function get_data(curr_page) {
-  store.commit('loading', true);
-  const url = `/job/-1?reverse=1&current_page=${curr_page}&page_size=${page_info.page_size}`;
+if (data_list.value.length === 0) {
+  get_data(1)
+}
+
+function get_data (curr_page) {
+  store.commit('loading', true)
+  const url = `/job?reverse=1&current_page=${curr_page}&page_size=${page_info.page_size}`
   $$.get(url)
       .then(res => {
-        store.commit('loading', false);
+        store.commit('loading', false)
         if (res.data.status === 200) {
-          data_list.value = res.data.data;
-          page_info.page_size = res.data.page_info.page_size;
-          page_info.total = res.data.page_info.total;
+          data_list.value = res.data.data
+          page_info.page_size = res.data.page_info.page_size
+          page_info.total = res.data.page_info.total
         } else {
           ElMessage({
             type: 'error',
             message: res.data.message,
-          });
+          })
         }
       })
       .catch(res => {
-        store.commit('loading', false);
+        store.commit('loading', false)
         ElMessage({
           type: 'error',
           message: res,
-        });
-      });
+        })
+      })
 }
 </script>
 
@@ -137,11 +137,19 @@ function get_data(curr_page) {
   width: 100%;
   border-collapse: collapse;
 
-  th {width: 5rem;vertical-align: top}
+  th {
+    width: 5rem;
+    vertical-align: top
+  }
 
-  th, td {padding: 5px 10px;text-align: justify;}
+  th, td {
+    padding: 5px 10px;
+    text-align: justify;
+  }
 
-  td {padding-right: 10px;}
+  td {
+    padding-right: 10px;
+  }
 
   tr + tr {
     border-top: 1px solid #DDD;

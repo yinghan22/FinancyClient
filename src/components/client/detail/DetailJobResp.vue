@@ -46,11 +46,8 @@
                 <el-form-item label="经办人">
                   <el-select v-model="props.data['operator_id']" disabled filterable>
                     <el-option
-                        v-for="item in store.getters[
-												'user_list'
-											]"
-                        :label="item.id + ' - ' + item.name"
-                        :value="item.id"
+                        :label="props.data['operator_id'] + ' - ' + props.data['operator_name']"
+                        :value="props.data['operator_id']"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -59,11 +56,8 @@
                 <el-form-item label="责任领导" prop="leader_id">
                   <el-select v-model="props.data['leader_id']" disabled filterable>
                     <el-option
-                        v-for="item in store.getters[
-												'user_list'
-											]"
-                        :label="item.id + ' - ' + item.name"
-                        :value="item.id"
+                        :label="props.data['leader_id'] + ' - ' + props.data['leader_name']"
+                        :value="props.data['leader_id']"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -88,11 +82,8 @@
                 <el-form-item label="部门">
                   <el-select v-model="props.data['dept_id']" disabled filterable>
                     <el-option
-                        v-for="item in store.getters[
-												'dept_list'
-											]"
-                        :label="item.name"
-                        :value="item.id"
+                        :label="props.data['dept_name']"
+                        :value="props.data['dept_id']"
                     ></el-option>
                   </el-select>
                 </el-form-item>
@@ -101,7 +92,12 @@
             <tr>
               <td>
                 <el-form-item label="填报人">
-                  <el-input v-model="props.data['requester']" readonly></el-input>
+                  <el-select v-model="props.data['requester']" disabled filterable>
+                    <el-option
+                        :label="props.data['requester'] + ' - ' + props.data['requester_name']"
+                        :value="props.data['requester']"
+                    ></el-option>
+                  </el-select>
                 </el-form-item>
               </td>
             </tr>
@@ -109,9 +105,9 @@
               <td>
                 <el-form-item label="审核小组">
                   <el-select v-model="props.data['applicant_id']" disabled filterable>
-                    <el-option v-for="item in store.getters['expert_group']"
-                               :label="item['id'] + ' - ' + item['tag']"
-                               :value="item['id']"
+                    <el-option
+                        :label=" props.data['applicant_id'] + ' - ' + props.data['applicant_tag']"
+                        :value="props.data['applicant_id']"
                     >
                     </el-option>
                   </el-select>
@@ -134,13 +130,12 @@
 </template>
 
 <script lang="ts" setup>
-import {useStore} from 'vuex';
+import {useStore} from 'vuex'
 
-const store = useStore();
+const store = useStore()
 const props = defineProps({
   data: Object,
-
-});
+})
 
 </script>
 

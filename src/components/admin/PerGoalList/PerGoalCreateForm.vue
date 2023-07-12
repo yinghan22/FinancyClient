@@ -110,13 +110,13 @@
 </template>
 
 <script lang="ts" setup>
-import type {FormInstance, FormRules} from 'element-plus';
-import {ElMessage} from 'element-plus';
-import {reactive, ref} from 'vue';
-import $$ from '../../../axios';
-import {useStore} from 'vuex';
+import type {FormInstance, FormRules} from 'element-plus'
+import {ElMessage} from 'element-plus'
+import {reactive, ref} from 'vue'
+import $$ from '../../../axios'
+import {useStore} from 'vuex'
 
-const store = useStore();
+const store = useStore()
 const props = defineProps({
   dept_list: Object,
   user_list: Array,
@@ -126,17 +126,17 @@ const props = defineProps({
     default: () => {
     },
   },
-});
+})
 
 
-const user_list = ref([]);
+const user_list = ref([])
 if (user_list.value.length === 0) {
-  $$.get('/user/-1').then(res => {
-    user_list.value = res.data.data;
-  });
+  $$.get('/user').then(res => {
+    user_list.value = res.data.data
+  })
 }
 
-const form_ref = ref<FormInstance>();
+const form_ref = ref<FormInstance>()
 const form = reactive({
   dept_id: '',
   quota_1: '',
@@ -150,17 +150,17 @@ const form = reactive({
   requester: '',
   applicant_id: null,
   refuse_reason: '',
-});
+})
 const change_file_list = (file, file_list) => {
   if (file.name in form.file_list) {
     ElMessage({
       type: 'error',
       message: '文件名已存在',
-    });
+    })
   } else {
-    form.file_list.push(file.raw);
+    form.file_list.push(file.raw)
   }
-};
+}
 const create_rules = reactive<FormRules>({
   dept_id: [{required: true, message: '该选项不得为空', trigger: 'blur'}],
   quota_1: [{required: true, message: '该选项不得为空', trigger: 'blur'}],
@@ -168,54 +168,54 @@ const create_rules = reactive<FormRules>({
   quota_3: [{required: true, message: '该选项不得为空', trigger: 'blur'}],
   quota_value: [{required: true, message: '该选项不得为空', trigger: 'blur'}],
   source: [{required: true, message: '该选项不得为空', trigger: 'blur'}],
-});
+})
 
 
 const create_data = (form_el: FormInstance | undefined) => {
-  if (!form_el) return;
+  if (!form_el) return
   form_el.validate(valid => {
     if (valid) {
-      store.commit('loading', true);
-      let form_data = new FormData();
+      store.commit('loading', true)
+      let form_data = new FormData()
       {
-        form_data.set('dept_id', form.dept_id);
-        form_data.set('quota_1', form.quota_1);
-        form_data.set('quota_2', form.quota_2);
-        form_data.set('quota_3', form.quota_3);
-        form_data.set('quota_value', form.quota_value);
-        form_data.set('source', form.source);
-        form_data.set('comm', form.comm);
-        form_data.set('requester', form.requester);
-        form_data.set('status', JSON.stringify(form.status));
-        form_data.set('applicant_id', form.applicant_id);
-        form_data.set('refuse_reason', form.refuse_reason);
+        form_data.set('dept_id', form.dept_id)
+        form_data.set('quota_1', form.quota_1)
+        form_data.set('quota_2', form.quota_2)
+        form_data.set('quota_3', form.quota_3)
+        form_data.set('quota_value', form.quota_value)
+        form_data.set('source', form.source)
+        form_data.set('comm', form.comm)
+        form_data.set('requester', form.requester)
+        form_data.set('status', JSON.stringify(form.status))
+        form_data.set('applicant_id', form.applicant_id)
+        form_data.set('refuse_reason', form.refuse_reason)
 
         for (let item of form.file_list) {
-          form_data.append('file_list', item);
+          form_data.append('file_list', item)
         }
       }
       $$.post('/goal', form_data)
           .then(res => {
-            store.commit('loading', false);
+            store.commit('loading', false)
             if (res.data.status === 200) {
-              props.success();
+              props.success()
             } else {
               ElMessage({
                 type: 'error',
                 message: res.data.message,
-              });
+              })
             }
           })
           .catch(res => {
-            store.commit('loading', false);
+            store.commit('loading', false)
             ElMessage({
               type: 'error',
               message: res,
-            });
-          });
+            })
+          })
     }
-  });
-};
+  })
+}
 </script>
 
 <style lang="scss" scoped>

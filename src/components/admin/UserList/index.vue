@@ -59,92 +59,95 @@
 </template>
 
 <script lang="ts" setup>
-import Card from '../../Card.vue';
-import {reactive, ref} from 'vue';
-import $$ from '../../../axios';
-import {useStore} from 'vuex';
-import {ElMessage, ElMessageBox} from 'element-plus';
-import UserCreateForm from './UserCreateForm.vue';
-import UserEditForm from './UserEditForm.vue';
+import Card from '../../Card.vue'
+import {onMounted, reactive, ref} from 'vue'
+import $$ from '../../../axios'
+import {useStore} from 'vuex'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import UserCreateForm from './UserCreateForm.vue'
+import UserEditForm from './UserEditForm.vue'
 
-const store = useStore();
+const store = useStore()
 const usertype_map = {
   'admin': '管理员',
-  'financy': '财务处',
+  'finance': '财务处',
   'expert': '专家',
   'client': '普通用户',
-};
+}
 
-const data_index = ref(0);
+const data_index = ref(0)
 const page_info = reactive({
   curr_page: 1,
   page_size: 20,
   total: 0,
-});
+})
 
-const data_list = ref([]);
-const dept_list = ref([]);
+const data_list = ref([])
+const dept_list = ref([])
 
 if (dept_list.value.length == 0) {
-  $$.get('/dept/-1').then(res => {
-    dept_list.value = res.data.data;
-  });
+  $$.get('/dept').then(res => {
+    dept_list.value = res.data.data
+  })
 }
 
 const page_to = (e) => {
-  get_data(e);
-};
+  get_data(e)
+}
+onMounted(() => {
+  page_to(1)
+})
 
-function get_data(e) {
-  store.commit('loading', true);
-  const url = `/user/-1?current_page=${e}&page_size=${page_info.page_size}`;
+function get_data (e) {
+  store.commit('loading', true)
+  const url = `/user?current_page=${e}&page_size=${page_info.page_size}`
   $$.get(url).then(res => {
 
-    store.commit('loading', false);
+    store.commit('loading', false)
     if (res.data.status === 200) {
-      data_list.value = res.data.data;
-      page_info.page_size = res.data.page_info.page_size;
-      page_info.total = res.data.page_info.total;
+      data_list.value = res.data.data
+      page_info.page_size = res.data.page_info.page_size
+      page_info.total = res.data.page_info.total
     } else {
       ElMessage({
         type: 'error',
         message: res.data.message,
-      });
+      })
     }
   }).catch(res => {
-    store.commit('loading', false);
+    store.commit('loading', false)
     ElMessage({
       type: 'error',
       message: res,
-    });
-  });
+    })
+  })
 }
 
 if (data_list.value.length === 0) {
-  get_data(1);
+  get_data(1)
 }
 
-const edit_visible = ref(false);
+const edit_visible = ref(false)
 const edit_success = () => {
-  edit_visible.value = false;
-  get_data(page_info.curr_page);
-};
-
-function data_edit(index) {
-  data_index.value = index;
-  edit_visible.value = true;
+  edit_visible.value = false
+  get_data(page_info.curr_page)
 }
 
-const create_visible = ref(false);
+function data_edit (index) {
+  data_index.value = index
+  edit_visible.value = true
+}
+
+const create_visible = ref(false)
 
 
 const create_success = () => {
   debugger
-  create_visible.value = false;
-  get_data(page_info.curr_page);
-};
+  create_visible.value = false
+  get_data(page_info.curr_page)
+}
 
-function data_delete_confirm(index) {
+function data_delete_confirm (index) {
   ElMessageBox.confirm(
       '是否确认删除？',
       '危险操作', {
@@ -153,47 +156,47 @@ function data_delete_confirm(index) {
         type: 'warning',
       },
   ).then(res => {
-    data_delete(index);
+    data_delete(index)
   }).catch(res => {
     ElMessage({
       type: 'info',
       message: '操作已取消',
-    });
-  });
+    })
+  })
 
 }
 
-function data_delete(index) {
+function data_delete (index) {
   if (data_list.value[index]['id'] === store.getters['userinfo']['id']) {
     ElMessage({
       type: 'warning',
       message: '此账号为当前登录的账号，不可删除',
-    });
-    return;
+    })
+    return
   }
 
-  const url = `/user/` + data_list.value[index]['id'];
+  const url = `/user/` + data_list.value[index]['id']
   $$.delete(url)
       .then(res => {
         if (res.data.status === 200) {
           ElMessage({
             type: 'success',
             message: '删除成功',
-          });
-          get_data(page_info.curr_page);
+          })
+          get_data(page_info.curr_page)
         } else {
           ElMessage({
             type: 'error',
             message: `删除失败 ${res.data.message}`,
-          });
+          })
         }
       })
       .catch(res => {
         ElMessage({
           type: 'error',
           message: res,
-        });
-      });
+        })
+      })
 }
 
 </script>

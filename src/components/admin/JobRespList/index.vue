@@ -117,7 +117,7 @@ const create_visible = ref(false);
 const dept_list = ref([]);
 
 if (dept_list.value.length == 0) {
-  $$.get('/dept/-1').then(res => {
+  $$.get('/dept').then(res => {
     dept_list.value = res.data.data;
   });
 }
@@ -132,7 +132,7 @@ if (data_list.value.length === 0) {
 
 function get_data(curr_page) {
   store.commit('loading', true);
-  const url = `/job/-1?reverse=1&current_page=${curr_page}&page_size=${page_info.page_size}`;
+  const url = `/job?reverse=1&current_page=${curr_page}&page_size=${page_info.page_size}`;
   $$.get(url)
       .then(res => {
         store.commit('loading', false);

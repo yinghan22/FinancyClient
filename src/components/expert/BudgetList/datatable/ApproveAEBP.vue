@@ -35,7 +35,6 @@
           <td>
             <el-form-item label="经济类型">
               <el-select v-model="props.data['eco_class_id']" disabled filterable>
-
                 <el-option-group v-for="item in store.getters['eco_class_list']"
                                  :label="item.classify + ' - ' + item.name">
                   <el-option v-for="value in store.getters['eco_kind_list'][item.classify]"
@@ -84,11 +83,8 @@
               <el-form-item label="部门">
                 <el-select v-model="props.data['dept_id']" disabled filterable>
                   <el-option
-                      v-for="item in store.getters[
-											'dept_list'
-										]"
-                      :label="item.name"
-                      :value="item.id"
+                      :label="props.data['dept_name']"
+                      :value="props.data['dept_id']"
                   ></el-option>
                 </el-select>
               </el-form-item>
@@ -97,16 +93,10 @@
           <tr>
             <td>
               <el-form-item label="申请人">
-                <el-select
-                    v-model="props.data['requester']"
-                    disabled filterable
-                >
+                <el-select v-model="props.data['requester']" disabled filterable>
                   <el-option
-                      v-for="item in store.getters[
-											'user_list'
-										]"
-                      :label="item.id + ' - ' + item.name"
-                      :value="item.id"
+                      :label="props.data['requester'] + ' - ' + props.data['requester_name']"
+                      :value="props.data['requester']"
                   ></el-option>
                 </el-select>
               </el-form-item>
@@ -116,8 +106,10 @@
             <td>
               <el-form-item label="审核小组">
                 <el-select v-model="props.data['applicant_id']" disabled filterable>
-                  <el-option v-for="item in store.getters['expert_group']" :label="item['tag']"
-                             :value="item['id']">
+                  <el-option
+                      :label=" props.data['applicant_id'] + ' - ' + props.data['applicant_tag']"
+                      :value="props.data['applicant_id']"
+                  >
                   </el-option>
                 </el-select>
               </el-form-item>
@@ -145,11 +137,11 @@
 </template>
 
 <script lang="ts" setup>
-import $$ from '../../../../axios';
-import {useStore} from 'vuex';
-import {ElMessage} from 'element-plus';
+import $$ from '../../../../axios'
+import {useStore} from 'vuex'
+import {ElMessage} from 'element-plus'
 
-const store = useStore();
+const store = useStore()
 const props = defineProps({
   data: Object,
   refuse: {
@@ -162,40 +154,45 @@ const props = defineProps({
     default: () => {
     },
   },
-});
+})
 
 const refuse = async () => {
-  if (props.data['refuse_reason'].trim() == '') {
-    ElMessage.error('【衔接业务单审核】请输入驳回原因');
-    return;
+  if (!props.data['refuse_reason'] || props.data['refuse_reason'].trim() == '') {
+    ElMessage.error('【衔接业务单审核】请输入驳回原因')
+    return
   }
-  props.data['refuse_reason'] = props.data['refuse_reason'].trim();
-  let form_data = new FormData();
+  props.data['refuse_reason'] = props.data['refuse_reason'].trim()
+  let form_data = new FormData()
   {
-    form_data.set('status', '3');
-    form_data.set('refuse_reason', props.data['refuse_reason']);
+    form_data.set('status', '3')
+    form_data.set('refuse_reason', props.data['refuse_reason'])
   }
   $$.put(`/aebp/approve/${props.data['code']}`, form_data).then(res => {
     if (res.data.status === 200) {
-      props.refuse('衔接业务单审核', props.data['refuse_reason']);
+      props.refuse('衔接业务单审核', props.data['refuse_reason'])
     } else {
-      ElMessage.error(res.data.message);
+      ElMessage.error(res.data.message)
     }
   }).catch(res => {
-    ElMessage.error(res);
-  });
-};
+    ElMessage.error(res)
+  })
+}
+
 
 const pass = () => {
-  let form_data = new FormData();
-  form_data.set('status', '2');
+  store.commit('area_loading', true)
+  let form_data = new FormData()
+  form_data.set('status', '2')
   $$.put(`/aebp/approve/${props.data['code']}`, form_data).then(res => {
     if (res.data.status === 200) {
-      props.data['status'] = 2;
-      ElMessage.success('【衔接业务单审核】审核通过');
+      props.data['status'] = 2
+      ElMessage.success('【衔接业务单审核】审核通过')
     }
-  });
-};
+    store.commit('area_loading', false)
+  }).catch(() => {
+    store.commit('area_loading', false)
+  })
+}
 </script>
 
 <style lang="scss" scoped>

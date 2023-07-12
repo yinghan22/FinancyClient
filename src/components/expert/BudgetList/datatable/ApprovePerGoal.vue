@@ -65,10 +65,10 @@
             <el-form-item label="附件">
               <ol style="margin: 0;padding: 0 1rem;">
                 <li v-for="item in props.data.file_list">
-                  <a :href="Config.base_url + '/' + item['file_path']" class="file_href"
+                  <a :href="Config.base_url + '/' + item['path']" class="file_href"
                      style="color: #000;"
                      target="_blank">
-                    {{ item['file_name'] }}
+                    {{ item['name'] }}
                   </a>
                 </li>
               </ol>
@@ -82,8 +82,8 @@
             <td>
               <el-form-item label="部门">
                 <el-select v-model="props.data['dept_id']" disabled filterable>
-                  <el-option v-for="item in store.getters['dept_list']" :label="item.name"
-                             :value="item.id"></el-option>
+                  <el-option :label="props.data['dept_name']"
+                             :value="props.data['dept_id']"></el-option>
                 </el-select>
               </el-form-item>
             </td>
@@ -92,9 +92,9 @@
             <td>
               <el-form-item label="填报人">
                 <el-select v-model="props.data['requester']" disabled filterable>
-                  <el-option v-for="item in store.getters['user_list']"
-                             :label="item.id + ' - ' +item.name"
-                             :value="item.id"></el-option>
+                  <el-option
+                      :label="props.data['requester']+ ' - ' + props.data['requester_name']"
+                      :value="props.data['requester']"></el-option>
                 </el-select>
               </el-form-item>
             </td>
@@ -103,8 +103,8 @@
             <td>
               <el-form-item label="审核小组">
                 <el-select v-model="props.data['applicant_id']" disabled filterable>
-                  <el-option v-for="item in store.getters['expert_group']" :label="item['tag']"
-                             :value="item['id']">
+                  <el-option :label="props.data['applicant_id'] + ' - ' + props.data['applicant_tag']"
+                             :value="props.data['applicant_id']">
                   </el-option>
                 </el-select>
               </el-form-item>
@@ -130,12 +130,12 @@
 </template>
 
 <script lang="ts" setup>
-import {useStore} from 'vuex';
-import {ElMessage} from 'element-plus';
-import $$ from '../../../../axios';
-import Config from '../../../../Config.js';
+import {useStore} from 'vuex'
+import {ElMessage} from 'element-plus'
+import $$ from '../../../../axios'
+import Config from '../../../../Config.js'
 
-const store = useStore();
+const store = useStore()
 const props = defineProps({
   data: Object,
   refuse: {
@@ -148,40 +148,44 @@ const props = defineProps({
     default: () => {
     },
   },
-});
+})
 
-const refuse = () => {
-  if (props.data['refuse_reason'].trim() == '') {
-    ElMessage.error('【绩效指标审核】请输入驳回原因');
-    return;
+const refuse = async () => {
+  if (!props.data['refuse_reason'] || props.data['refuse_reason'].trim() == '') {
+    ElMessage.error('【绩效指标审核】请输入驳回原因')
+    return
   }
-  props.data['refuse_reason'] = props.data['refuse_reason'].trim();
-  let form_data = new FormData();
+  props.data['refuse_reason'] = props.data['refuse_reason'].trim()
+  let form_data = new FormData()
   {
-    form_data.set('refuse_reason', props.data['refuse_reason']);
-    form_data.set('status', '3');
+    form_data.set('refuse_reason', `${props.data['refuse_reason']}`)
+    form_data.set('status', '3')
   }
   $$.put(`/goal/approve/${props.data['id']}`, form_data).then(res => {
     if (res.data.status === 200) {
-      props.refuse();
+      props.refuse('绩效目标审核', props.data['refuse_reason'])
     } else {
-      ElMessage.error(res.data.message);
+      ElMessage.error(res.data.message)
     }
   }).catch(res => {
-    ElMessage.error(res);
-  });
-};
+    ElMessage.error(res)
+  })
+}
 
 const pass = () => {
-  let form_data = new FormData();
-  form_data.set('status', '2');
+  store.commit('area_loading', true)
+  let form_data = new FormData()
+  form_data.set('status', '2')
   $$.put(`/goal/approve/${props.data['id']}`, form_data).then(res => {
     if (res.data.status === 200) {
-      props.data['status'] = 2;
-      ElMessage.success('【绩效目标】审核通过');
+      props.data['status'] = 2
+      ElMessage.success('【绩效目标】审核通过')
     }
-  });
-};
+    store.commit('area_loading', false)
+  }).catch(() => {
+    store.commit('area_loading', false)
+  })
+}
 </script>
 
 <style lang="scss" scoped>

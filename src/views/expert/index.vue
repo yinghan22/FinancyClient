@@ -15,40 +15,27 @@
     </div>
     <div class="flex-grow-1">
       <component :is="curr_comp"></component>
+      <!--      <BudgetList></BudgetList>-->
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {markRaw, onMounted, reactive, ref} from 'vue';
+import {markRaw, reactive, ref} from 'vue'
 
-import BudgetList from '../../components/expert/BudgetList/index.vue';
-import ListGroup from '../../components/ListGroup.vue';
-import {useStore} from 'vuex';
+import BudgetList from '../../components/expert/BudgetList/index.vue'
+import ListGroup from '../../components/ListGroup.vue'
+import {useStore} from 'vuex'
 
-const store = useStore();
+const store = useStore()
 const admin_list = reactive([
   {label: '公用经费预算', comp: markRaw(BudgetList)},
-]);
-const curr_comp = ref(admin_list[0].comp);
+])
+const curr_comp = ref(admin_list[0].comp)
 const curr_change = (index) => {
-  curr_comp.value = admin_list[index].comp;
-};
-
-onMounted(() => {
-  init_env();
-});
-
-function init_env() {
-  store.dispatch('expert_group');
-  store.dispatch('dept_list');
-  store.dispatch('user_list');
-  store.dispatch('eco_list');
-  store.dispatch('job_list');
-  store.dispatch('goal_list');
-  store.dispatch('aebp_list');
-  store.dispatch('awp_list');
+  // curr_comp.value = admin_list[index].comp
 }
+
 
 </script>
 

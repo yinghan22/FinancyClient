@@ -46,7 +46,7 @@
           </template>
         </el-table-column>
         <el-table-column label="编号" prop="id"></el-table-column>
-        <el-table-column label="经济类型" prop="eco_name"></el-table-column>
+        <el-table-column label="经济类型" prop="eco_class_name"></el-table-column>
         <el-table-column label="预算金额(元)" prop="budget_price"></el-table-column>
         <el-table-column label="衔接业务单编码" prop="aebp_id"></el-table-column>
         <el-table-column label="上年度本业务实际支出(元)" prop="actual_cost"></el-table-column>
@@ -62,7 +62,7 @@
         <el-table-column align="center" label="操作">
           <template #default="scope">
             <el-button-group size="small">
-              <el-button :disabled="scope.row.status == 3" type="primary" @click="approve_budget(scope.row)">审核
+              <el-button type="primary" @click="approve_budget(scope.row)">审核
               </el-button>
             </el-button-group>
           </template>
@@ -93,140 +93,156 @@
 </template>
 
 <script lang="ts" setup>
-import {reactive, ref} from 'vue';
-import Card from '../../Card.vue';
-import {ElMessage} from 'element-plus';
-import $$ from '../../../axios';
-import ApproveForm from './ApproveForm.vue';
-import {useStore} from 'vuex';
+import {onMounted, reactive, ref} from 'vue'
+import Card from '../../Card.vue'
+import {ElMessage} from 'element-plus'
+import $$ from '../../../axios'
+import ApproveForm from './ApproveForm.vue'
+import {useStore} from 'vuex'
 
-const store = useStore();
-const data_list = ref([]);
+const store = useStore()
+const data_list = ref([])
 const page_info = reactive({
   curr_page: 1,
   total: 10,
   page_size: 14,
-});
+})
 
-const budget = ref({});
-const aebp = ref({});
-const awp = ref({});
-const job_resp = ref({});
-const per_goal = ref({});
+const budget = ref({})
+const aebp = ref({})
+const awp = ref({})
+const job_resp = ref({})
+const per_goal = ref({})
 
-const approve_visible = ref(false);
+const approve_visible = ref(false)
 
-const expert_belong_group = ref([]);
+const expert_belong_group = ref([])
 
 const page_to = (curr_page) => {
-  get_data(curr_page);
-};
+  get_data(curr_page)
+}
 
 if (data_list.value.length === 0) {
-  get_data(1);
+  get_data(1)
 }
 
-async function get_expert_group() {
-  let response = await $$.get('/expert_group/-1', {
-    params: {
-      select_by: JSON.stringify(['expert_id']),
-      select: JSON.stringify({
-        expert_id: [store.getters['userinfo']['id']],
-      }),
-    },
-  });
-  let group_list = response.data.data;
-  let res = [];
-  for (let item of group_list) {
-    res.push(item.group_id);
-  }
-  return res;
-}
 
-async function get_data(curr_page) {
+function get_data (curr_page) {
   // 获取当前专家所在分组，以获取被分配的待审核单
-  if (expert_belong_group.value.length === 0)
-    expert_belong_group.value = await get_expert_group();
-  const url = `/budget/-1?reverse=1&current_page=${curr_page}&page_size=${page_info.page_size}`;
-  $$.get(url, {
-    params: {
-      select_by: JSON.stringify(['status', 'applicant_id']),
-      select: JSON.stringify({
-        status: [1, 3],
-        applicant_id: expert_belong_group.value,
-      }),
-    },
-  })
-      .then(res => {
-        if (res.data.status === 200) {
-          data_list.value = res.data.data;
-          page_info.page_size = res.data.page_info.page_size;
-          page_info.total = res.data.page_info.total;
-        } else {
+  if (expert_belong_group.value.length === 0) {
+    const url = `/budget/-1?reverse=1&current_page=${curr_page}&page_size=${page_info.page_size}`
+    $$.get(url, {
+      params: {
+        select_by: JSON.stringify(['status', 'applicant_id']),
+        select: JSON.stringify({
+          status: [1, 2, 3],
+          applicant_id: store.getters['user_group'],
+        }),
+      },
+    })
+        .then(res => {
+          if (res.data.status === 200) {
+            data_list.value = res.data.data
+            page_info.page_size = res.data.page_info.page_size
+            page_info.total = res.data.page_info.total
+          } else {
+            ElMessage({
+              type: 'error',
+              message: res.data.message,
+            })
+          }
+        })
+        .catch(res => {
           ElMessage({
             type: 'error',
-            message: res.data.message,
-          });
-        }
-      })
-      .catch(res => {
-        ElMessage({
-          type: 'error',
-          message: res,
-        });
-      });
-}
-
-async function get_job_resp(job_resp_code) {
-  let response = await $$.get(`/job/${job_resp_code}`);
-  if (response.data.status === 200) {
-    job_resp.value = response.data.data[0];
+            message: res,
+          })
+        })
   }
 }
 
-async function get_per_goal(per_goal_code) {
-  let response = await $$.get(`/goal/${per_goal_code}`);
-  if (response.data.status === 200) {
-    per_goal.value = response.data.data[0];
+const budget_status = ref<boolean>(false)
+const aebp_status = ref<boolean>(false)
+const awp_status = ref<boolean>(false)
+const job_resp_status = ref<boolean>(false)
+const per_goal_status = ref<boolean>(false)
+
+async function get_job_resp (job_resp_code, cb: Function) {
+  let response = await $$.get(`/job/id/${job_resp_code}`)
+  if (response.data.status == 200) {
+    job_resp.value = response.data.data[0]
+    job_resp_status.value = true
+    cb()
   }
 }
 
-async function get_awp(awp_id) {
-  let response = await $$.get(`/awp/${awp_id}`);
-  if (response.data.status === 200) {
-    awp.value = response.data.data[0];
-    await get_per_goal(awp.value['per_goal_id']);
-    await get_job_resp(awp.value['job_resp_id']);
+async function get_per_goal (per_goal_code, cb: Function) {
+  let response = await $$.get(`/goal/id/${per_goal_code}`)
+  if (response.data.status == 200) {
+    per_goal.value = response.data.data[0]
+    per_goal_status.value = true
+    cb()
   }
 }
 
-async function get_aebp(aebp_id) {
-  let response = await $$.get(`/aebp/${aebp_id}`);
+async function get_awp (awp_id, cb: Function) {
+  let response = await $$.get(`/awp/code/${awp_id}`)
   if (response.data.status === 200) {
-    aebp.value = response.data.data[0];
-    await get_awp(aebp.value['annual_work_plan_id']);
+    awp.value = response.data.data[0]
+    awp_status.value = true
+    await get_per_goal(awp.value['per_goal_id'], cb)
+    await get_job_resp(awp.value['job_resp_id'], cb)
+    cb()
+  }
+}
+
+async function get_aebp (aebp_id, cb: Function) {
+  let response = await $$.get(`/aebp/code/${aebp_id}`)
+  if (response.data.status === 200) {
+    aebp.value = response.data.data[0]
+    aebp_status.value = true
+    await get_awp(aebp.value['annual_work_plan_id'], cb)
+    cb()
   }
 }
 
 
 const approve_budget = async (item) => {
-  store.commit('loading', true);
-  budget.value = item;
-  const aebp_id = budget.value['aebp_id'];
-  await get_aebp(aebp_id);
-  store.commit('loading', false);
-  approve_visible.value = true;
-};
+  store.dispatch('loading', {status: true})
+  budget.value = item
+  budget_status.value = true
+  const aebp_id = budget.value['aebp_id']
+  await get_aebp(aebp_id, () => {
+    if (budget_status.value && aebp_status.value && awp_status.value && job_resp_status.value && per_goal_status.value) {
+      store.dispatch('loading', {status: false})
+      approve_visible.value = true
+    }
+  })
+}
 
 const refuse = () => {
-  approve_visible.value = false;
-  get_data(page_info.curr_page);
-};
+  approve_visible.value = false
+  budget_status.value = false
+  aebp_status.value = false
+  awp_status.value = false
+  job_resp_status.value = false
+  per_goal_status.value = false
+  get_data(page_info.curr_page)
+}
 
 const pass = () => {
-  approve_visible.value = false;
-  get_data(page_info.curr_page);
-};
+  budget_status.value = false
+  aebp_status.value = false
+  awp_status.value = false
+  job_resp_status.value = false
+  per_goal_status.value = false
+  approve_visible.value = false
+  get_data(page_info.curr_page)
+}
+
+onMounted(() => {
+  store.dispatch('eco_list', {keyword: ''})
+})
 </script>
 
 <style lang="scss" scoped>

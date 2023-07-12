@@ -19,7 +19,11 @@
     </el-form-item>
     <el-form-item label="部门" prop="dept_id" required>
       <el-select v-model="form['dept_id']" filterable>
-        <el-option v-for="item in dept_list" :label="item.name" :value="item.id"></el-option>
+        <el-option
+            v-for="item in props.dept_list"
+            :label="item.name"
+            :value="item.id">
+        </el-option>
       </el-select>
     </el-form-item>
     <el-form-item label="备注">

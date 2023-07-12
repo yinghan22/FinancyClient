@@ -12,35 +12,35 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, watch} from 'vue';
+import {onMounted, ref, watch} from 'vue'
 
 const props = defineProps({
   width: {
     type: String,
     required: false,
-    default() {
-      return '100%';
+    default () {
+      return '100%'
     },
   },
   minWidth: {
     type: String,
     required: false,
-    default() {
-      return 'initial';
+    default () {
+      return 'initial'
     },
   },
   data: {
     type: Array,
     required: true,
-    default() {
-      return [];
+    default () {
+      return []
     },
   },
   content: {
     type: Function,
     required: false,
     default: (item, index) => {
-      return item;
+      return item
     },
   },
   curr_change: {
@@ -49,13 +49,19 @@ const props = defineProps({
     default: (index) => {
     },
   },
-});
+})
 
-const current_index = ref(0);
+const current_index = ref(0)
 
 watch(current_index, (e) => {
-  props.curr_change(current_index.value);
-});
+  props.curr_change(current_index.value)
+  localStorage.setItem('curr_comp_index', `${current_index.value}`)
+})
+
+onMounted(() => {
+  let last_index = +localStorage.getItem('curr_comp_index')
+  current_index.value = last_index > props.data.length ? 0 : last_index
+})
 </script>
 
 <style lang="scss" scoped>

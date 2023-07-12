@@ -7,10 +7,10 @@
       label-width="160px"
       status-icon
   >
-    <div style="display: flex; flex-direction: column">
-      <div style="display: flex; flex-direction: row">
+    <div class="d-flex flex-col">
+      <div class="d-flex flex-row">
         <div>
-          <table style="width: 100%">
+          <table class="w-100">
             <tr>
               <td>
                 <el-form-item label="职责编号" prop="code">
@@ -124,11 +124,11 @@
             <tr>
               <td>
                 <el-form-item
+                    disabled="disabled"
                     label="审批小组"
-                    prop="applicant_id"
-                    required
+                    prop="applicant_id" required
                 >
-                  <el-select v-model="form['applicant_id']" filterable>
+                  <el-select v-model="form['applicant_id']" disabled filterable>
                     <el-option v-for="item in store.getters['expert_group']"
                                :label="item['id'] + ' - ' + item['tag']"
                                :value="item['id']"
@@ -145,8 +145,8 @@
                   required
               >
                 <el-select v-model="form['status']"
-                           filterable
-                           @change="status_change"
+                           disabled
+                           filterable @change="status_change"
                 >
                   <el-option
                       v-for="(item, index) in store.getters[
@@ -196,14 +196,14 @@
 </template>
 
 <script lang="ts" setup>
-import type {FormInstance, FormRules} from 'element-plus';
-import {ElMessage} from 'element-plus';
-import {reactive, ref} from 'vue';
-import $$ from '../../../../axios';
-import {useStore} from 'vuex';
-import now_datetime from '../../../../utils/now.js';
+import type {FormInstance, FormRules} from 'element-plus'
+import {ElMessage} from 'element-plus'
+import {reactive, ref} from 'vue'
+import $$ from '../../../../axios'
+import {useStore} from 'vuex'
+import now_datetime from '../../../../utils/now.js'
 
-const store = useStore();
+const store = useStore()
 const props = defineProps({
   form: {
     type: Object,
@@ -229,21 +229,21 @@ const props = defineProps({
     default: () => {
     },
   },
-});
+})
 
-const status = props.form.status;
-let request_time = false;
-let approve_time = false;
+const status = props.form.status
+let request_time = false
+let approve_time = false
 
 const status_change = (e) => {
   if (status == 0 && e == 1) {
-    request_time = true;
+    request_time = true
   } else if (status == 1 && e != 0 && e != 1) {
-    approve_time = true;
+    approve_time = true
   }
-};
+}
 
-const form_ref = ref<FormInstance>();
+const form_ref = ref<FormInstance>()
 const create_rules = reactive<FormRules>({
   department_id: [
     {required: true, message: '该选项不得为空', trigger: 'blur'},
@@ -270,56 +270,56 @@ const create_rules = reactive<FormRules>({
   refuse_reason: [
     {required: true, message: '该选项不得为空', trigger: 'blur'},
   ],
-});
+})
 
 const update_data = (form_el: FormInstance | undefined) => {
-  if (!form_el) return;
+  if (!form_el) return
   form_el.validate((valid) => {
     if (valid) {
-      store.commit('loading', true);
-      let form_data = new FormData();
+      store.commit('loading', true)
+      let form_data = new FormData()
       {
-        form_data.set('detail', props.form.detail);
-        form_data.set('department_id', props.form.department_id);
-        form_data.set('operator_id', props.form.operator_id);
-        form_data.set('leader_id', props.form.leader_id);
-        form_data.set('comm', props.form.comm);
-        form_data.set('abstract', props.form.abstract);
+        form_data.set('detail', props.form.detail)
+        form_data.set('department_id', props.form.department_id)
+        form_data.set('operator_id', props.form.operator_id)
+        form_data.set('leader_id', props.form.leader_id)
+        form_data.set('comm', props.form.comm)
+        form_data.set('abstract', props.form.abstract)
 
-        form_data.set('status', JSON.stringify(props.form.status));
-        form_data.set('requester', props.form.requester);
-        form_data.set('applicant_id', props.form.applicant_id);
-        form_data.set('refuse_reason', props.form.refuse_reason);
+        form_data.set('status', JSON.stringify(props.form.status))
+        form_data.set('requester', props.form.requester)
+        form_data.set('applicant_id', props.form.applicant_id)
+        form_data.set('refuse_reason', props.form.refuse_reason)
 
         if (request_time) {
-          form_data.set('request_time', now_datetime());
+          form_data.set('request_time', now_datetime())
         }
         if (approve_time) {
-          form_data.set('approve_time', now_datetime());
+          form_data.set('approve_time', now_datetime())
         }
       }
       $$.put(`/job/${props.form.id}`, form_data)
           .then((res) => {
-            store.commit('loading', false);
+            store.commit('loading', false)
             if (res.data.status === 200) {
-              props.success();
+              props.success()
             } else {
               ElMessage({
                 type: 'error',
                 message: res.data.message,
-              });
+              })
             }
           })
           .catch((res) => {
-            store.commit('loading', false);
+            store.commit('loading', false)
             ElMessage({
               type: 'error',
               message: res,
-            });
-          });
+            })
+          })
     }
-  });
-};
+  })
+}
 </script>
 
 <style lang="scss" scoped></style>

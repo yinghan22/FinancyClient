@@ -147,15 +147,15 @@
 </template>
 
 <script lang="ts" setup>
-import type {FormInstance, FormRules} from 'element-plus';
-import {ElMessage} from 'element-plus';
-import {reactive, ref} from 'vue';
-import $$ from '../../../axios';
-import {useStore} from 'vuex';
-import Formatter from '../../../utils/formatter.js';
-import now_datetime from '../../../utils/now.js';
+import type {FormInstance, FormRules} from 'element-plus'
+import {ElMessage} from 'element-plus'
+import {reactive, ref} from 'vue'
+import $$ from '../../../axios'
+import {useStore} from 'vuex'
+import Formatter from '../../../utils/formatter.js'
+import now_datetime from '../../../utils/now.js'
 
-const store = useStore();
+const store = useStore()
 const props = defineProps({
   form: {
     type: Object,
@@ -183,72 +183,73 @@ const props = defineProps({
     default: () => {
     },
   },
-});
+})
 
 
-const form_ref = ref<FormInstance>();
+const form_ref = ref<FormInstance>()
 const create_rules = reactive<FormRules>({
   id: [{required: true, message: '请输入业务单编码', trigger: 'blur'}],
-});
+})
 
-const status = props.form.status;
-let request_time = false;
-let approve_time = false;
+const status = props.form.status
+let request_time = false
+let approve_time = false
 
 const status_change = (e: any) => {
   if (status == 0 && e == 1) {
-    request_time = true;
+    request_time = true
   } else if (status == 1 && e != 0 && e != 1) {
-    approve_time = true;
+    approve_time = true
   }
-};
+}
 
 const update_data = (form_el: FormInstance | undefined) => {
   form_el.validate(valid => {
     if (valid) {
-      let form_data = new FormData();
+      debugger
+      let form_data = new FormData()
       {
-        form_data.set('detail', props.form.detail);
-        form_data.set('start_date', Formatter.format_date(props.form.start_date));
-        form_data.set('content', props.form.content);
-        form_data.set('eco_class_id', props.form.eco_class_id);
-        form_data.set('annual_work_plan_id', props.form.annual_work_plan_id);
-        form_data.set('carry_out', props.form.carry_out);
-        form_data.set('comm', props.form.comm);
-        form_data.set('dept_id', props.form.dept_id);
+        form_data.set('detail', props.form.detail)
+        form_data.set('start_date', Formatter.format_date(props.form.start_date))
+        form_data.set('content', props.form.content)
+        form_data.set('eco_class_id', props.form.eco_class_id)
+        form_data.set('annual_work_plan_id', props.form.annual_work_plan_id)
+        form_data.set('carry_out', props.form.carry_out)
+        form_data.set('comm', props.form.comm)
+        form_data.set('dept_id', props.form.dept_id)
 
-        form_data.set('status', JSON.stringify(props.form.status));
-        form_data.set('requester', props.form.requester);
-        form_data.set('applicant_id', props.form.applicant_id);
-        form_data.set('refuse_reason', props.form.refuse_reason);
+        form_data.set('status', JSON.stringify(props.form.status))
+        form_data.set('requester', props.form.requester)
+        form_data.set('applicant_id', props.form.applicant_id)
+        form_data.set('refuse_reason', props.form.refuse_reason)
 
         if (request_time) {
-          form_data.set('request_time', now_datetime());
+          form_data.set('request_time', now_datetime())
         }
         if (approve_time) {
-          form_data.set('approve_time', now_datetime());
+          form_data.set('approve_time', now_datetime())
         }
       }
       $$.put(`/aebp/${props.form.code}`, form_data)
           .then(res => {
             if (res.data.status === 200) {
-              props.success();
+              props.success()
             } else {
               ElMessage({
                 type: 'error',
                 message: res.data.message,
-              });
+              })
             }
           })
           .catch(res => {
             ElMessage({
               type: 'error',
               message: res,
-            });
-          });
+            })
+          })
     }
-  });
-};
+  })
+}
 
 </script>
 

@@ -18,10 +18,10 @@
                 <td>
                   <ol style="margin: 0;padding: 0 1rem;">
                     <li v-for="item in props.row.file_list">
-                      <a :href="Config.base_url + '/' + item.file_path" class="file_href"
+                      <a :href="Config.base_url + '/' + item.path" class="file_href"
                          style="color: #000;"
                          target="_blank">
-                        {{ item.file_name }}
+                        {{ item.name }}
                       </a>
                     </li>
                   </ol>
@@ -119,51 +119,51 @@
 </template>
 
 <script lang="ts" setup>
-import {reactive, ref} from 'vue';
-import Card from '../../../Card.vue';
-import {ElMessage, ElMessageBox} from 'element-plus';
-import $$ from '../../../../axios';
-import PerGoalCreateForm from './PerGoalCreateForm.vue';
-import PerGoalEditForm from './PerGoalEditForm.vue';
-import Config from '../../../../Config.js';
-import {useStore} from 'vuex';
+import {reactive, ref} from 'vue'
+import Card from '../../../Card.vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import $$ from '../../../../axios'
+import PerGoalCreateForm from './PerGoalCreateForm.vue'
+import PerGoalEditForm from './PerGoalEditForm.vue'
+import Config from '../../../../Config.js'
+import {useStore} from 'vuex'
 
 const status_list = ref({
   0: '待申请',
   1: '待审批',
   2: '审批通过',
   3: '审批驳回',
-});
-const store = useStore();
-const data_list = ref([]);
+})
+const store = useStore()
+const data_list = ref([])
 const page_info = reactive({
   curr_page: 1,
   total: 10,
   page_size: 10,
-});
-const data_index = ref(0);
-const edit_visible = ref(false);
+})
+const data_index = ref(0)
+const edit_visible = ref(false)
 
-const user_list = ref([]);
+const user_list = ref([])
 if (user_list.value.length === 0) {
   $$.get('/user/-1').then(res => {
-    user_list.value = res.data.data;
-  });
+    user_list.value = res.data.data
+  })
 }
 
-const create_visible = ref(false);
+const create_visible = ref(false)
 
 const page_to = (curr_page) => {
-  get_data(curr_page);
-};
-
-if (data_list.value.length === 0) {
-  get_data(1);
+  get_data(curr_page)
 }
 
-function get_data(curr_page) {
-  store.commit('loading', true);
-  const url = `/goal/-1?reverse=1&current_page=${curr_page}&page_size=${page_info.page_size}`;
+if (data_list.value.length === 0) {
+  get_data(1)
+}
+
+function get_data (curr_page) {
+  store.commit('loading', true)
+  const url = `/goal/-1?reverse=1&current_page=${curr_page}&page_size=${page_info.page_size}`
   $$.get(url, {
     params: {
       select_by: JSON.stringify(['requester']),
@@ -173,35 +173,35 @@ function get_data(curr_page) {
     },
   })
       .then(res => {
-        store.commit('loading', false);
+        store.commit('loading', false)
         if (res.data.status === 200) {
-          data_list.value = res.data.data;
-          page_info.page_size = res.data.page_info.page_size;
-          page_info.total = res.data.page_info.total;
+          data_list.value = res.data.data
+          page_info.page_size = res.data.page_info.page_size
+          page_info.total = res.data.page_info.total
         } else {
           ElMessage({
             type: 'error',
             message: res.data.message,
-          });
+          })
         }
       })
       .catch(res => {
-        store.commit('loading', false);
+        store.commit('loading', false)
         ElMessage({
           type: 'error',
           message: res,
-        });
-      });
+        })
+      })
 }
 
 const create_success = () => {
-  create_visible.value = false;
-  get_data(page_info.curr_page);
-};
+  create_visible.value = false
+  get_data(page_info.curr_page)
+}
 const data_edit = (index) => {
-  data_index.value = index;
-  edit_visible.value = true;
-};
+  data_index.value = index
+  edit_visible.value = true
+}
 
 const data_delete_confirm = (index) => {
   ElMessageBox.confirm(
@@ -212,61 +212,61 @@ const data_delete_confirm = (index) => {
         type: 'warning',
       },
   ).then(res => {
-    data_delete(index);
+    data_delete(index)
   }).catch(res => {
     ElMessage({
       type: 'info',
       message: '操作已取消',
-    });
-  });
-};
+    })
+  })
+}
 
-function data_delete(index) {
-  const url = `/goal/` + data_list.value[index]['id'];
+function data_delete (index) {
+  const url = `/goal/` + data_list.value[index]['id']
   $$.delete(url)
       .then(res => {
         if (res.data.status === 200) {
           ElMessage({
             type: 'success',
             message: '删除成功',
-          });
-          get_data(page_info.curr_page);
+          })
+          get_data(page_info.curr_page)
         } else {
           ElMessage({
             type: 'error',
             message: `删除失败 ${res.data.message}`,
-          });
+          })
         }
       })
       .catch(res => {
         ElMessage({
           type: 'error',
           message: res,
-        });
-      });
+        })
+      })
 }
 
 const edit_success = () => {
-  edit_visible.value = false;
-  get_data(page_info.curr_page);
-};
+  edit_visible.value = false
+  get_data(page_info.curr_page)
+}
 
-function approve(id) {
-  store.commit('loading', true);
-  let form_data = new FormData();
-  form_data.set('status', '1');
+function approve (id) {
+  store.commit('loading', true)
+  let form_data = new FormData()
+  form_data.set('status', '1')
   $$.put(`/goal/approve/${id}`, form_data).then(res => {
-    store.commit('loading', false);
+    store.commit('loading', false)
     if (res.data.status == 200) {
-      ElMessage.success('申请审核成功，请等待审核结果');
-      get_data(page_info.curr_page);
+      ElMessage.success('申请审核成功，请等待审核结果')
+      get_data(page_info.curr_page)
     } else {
-      ElMessage.error(res.data.message);
+      ElMessage.error(res.data.message)
     }
   }).catch(res => {
-    store.commit('loading', false);
-    ElMessage.error(res);
-  });
+    store.commit('loading', false)
+    ElMessage.error(res)
+  })
 }
 </script>
 
@@ -276,23 +276,34 @@ function approve(id) {
   width: 100%;
   border-collapse: collapse;
 
-  th {width: 5rem;vertical-align: top}
+  th {
+    width: 5rem;
+    vertical-align: top
+  }
 
-  th, td {padding: 5px 10px;text-align: justify;}
+  th, td {
+    padding: 5px 10px;
+    text-align: justify;
+  }
 
-  td {padding-right: 10px;}
+  td {
+    padding-right: 10px;
+  }
 
   tr + tr {
     border-top: 1px solid #DDD;
   }
 }
 
-.file_href {text-decoration: none;
+.file_href {
+  text-decoration: none;
   display: inline-block;
 
   padding: 0 0 5px 0;
 
-  &:hover {text-decoration: underline;}
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 

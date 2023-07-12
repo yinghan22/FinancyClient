@@ -11,7 +11,7 @@
         <tr>
           <td>
             <el-form-item label="申请人" prop="requester" required>
-              <el-select v-model="form.requester" filterable>
+              <el-select v-model="form['requester']" filterable>
                 <el-option
                     v-for="item in store.getters['user_list']"
                     :label="item.id + ' - ' + item.name"
@@ -153,13 +153,14 @@
 </template>
 
 <script lang="ts" setup>
-import type {FormInstance, FormRules} from 'element-plus';
-import {ElMessage} from 'element-plus';
-import {reactive, ref} from 'vue';
-import $$ from '../../../axios';
-import {useStore} from 'vuex';
+import type {FormInstance, FormRules} from 'element-plus'
+import {ElMessage} from 'element-plus'
+import {reactive, ref} from 'vue'
+import $$ from '../../../axios'
+import {useStore} from 'vuex'
+import now_datetime from '../../../utils/now.js'
 
-const store = useStore();
+const store = useStore()
 const props = defineProps({
   success: {
     type: Function,
@@ -167,9 +168,9 @@ const props = defineProps({
     default: () => {
     },
   },
-});
+})
 
-const form_ref = ref<FormInstance>();
+const form_ref = ref<FormInstance>()
 const form = reactive({
   dept_id: '',
   requester: '',
@@ -181,7 +182,7 @@ const form = reactive({
   status: 0,
   applicant_id: '',
   refuse_reason: '',
-});
+})
 const create_rules = reactive<FormRules>({
   department_id: [
     {required: true, message: '该选项不得为空', trigger: 'blur'},
@@ -210,68 +211,68 @@ const create_rules = reactive<FormRules>({
   refuse_reason: [
     {required: true, message: '该选项不得为空', trigger: 'blur'},
   ],
-});
+})
 
-const status = form.status;
-let request_time = false;
-let approve_time = false;
+const status = form.status
+let request_time = false
+let approve_time = false
 
 const status_change = (e) => {
   if (status === 0 && e === 1) {
-    request_time = true;
+    request_time = true
   } else if (status === 1 && e !== 0 && e !== 1) {
-    approve_time = true;
+    approve_time = true
   }
-};
+}
 
 const create_data = (form_el: FormInstance | undefined) => {
-  if (!form_el) return;
+  if (!form_el) return
   form_el.validate((valid) => {
     if (valid) {
-      store.commit('loading', true);
-      let form_data = new FormData();
+      store.commit('loading', true)
+      let form_data = new FormData()
       {
-        form_data.set('dept_id', form.dept_id);
-        form_data.set('detail', form.detail);
-        form_data.set('operator_id', form.operator_id);
-        form_data.set('leader_id', form.leader_id);
-        form_data.set('comm', form.comm);
-        form_data.set('abstract', form.abstract);
+        form_data.set('dept_id', form.dept_id)
+        form_data.set('detail', form.detail)
+        form_data.set('operator_id', form.operator_id)
+        form_data.set('leader_id', form.leader_id)
+        form_data.set('comm', form.comm)
+        form_data.set('abstract', form.abstract)
 
-        form_data.set('requester', form.requester);
-        form_data.set('status', JSON.stringify(form.status));
-        form_data.set('applicant_id', form.applicant_id);
-        form_data.set('refuse_reason', form.refuse_reason);
+        form_data.set('requester', form.requester)
+        form_data.set('status', JSON.stringify(form.status))
+        form_data.set('applicant_id', form.applicant_id)
+        form_data.set('refuse_reason', form.refuse_reason)
 
         if (request_time) {
-          form_data.set('request_time', now_datetime());
+          form_data.set('request_time', now_datetime())
         }
         if (approve_time) {
-          form_data.set('approve_time', now_datetime());
+          form_data.set('approve_time', now_datetime())
         }
       }
       $$.post('/job', form_data)
           .then((res) => {
-            store.commit('loading', false);
+            store.commit('loading', false)
             if (res.data.status === 200) {
-              props.success();
+              props.success()
             } else {
               ElMessage({
                 type: 'error',
                 message: res.data.message,
-              });
+              })
             }
           })
           .catch((res) => {
-            store.commit('loading', false);
+            store.commit('loading', false)
             ElMessage({
               type: 'error',
               message: res,
-            });
-          });
+            })
+          })
     }
-  });
-};
+  })
+}
 </script>
 
 <style lang="scss" scoped></style>

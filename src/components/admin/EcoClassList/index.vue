@@ -34,14 +34,14 @@
 </template>
 
 <script lang="ts" setup>
-import Card from '../../Card.vue';
-import {useStore} from 'vuex';
+import Card from '../../Card.vue'
+import {useStore} from 'vuex'
 
-const store = useStore();
+const store = useStore()
 
 
 const export_data = () => {
-};
+}
 </script>
 
 <style lang="scss" scoped>

@@ -40,7 +40,7 @@
           <td>
             <el-form-item label="衔接业务单编码">
               <el-select v-model="data['aebp_id']" disabled>
-                <el-option v-for="item in store.getters['aebp_list']" :label="item.code" :value="item.code"
+                <el-option :label="props.data['aebp_code']" :value="props.data['aebp_code']"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -73,20 +73,11 @@
         <table>
           <tr>
             <td>
-              <el-form-item
-                  label="申请人"
-              >
-                <el-select
-                    v-model="data['requester']"
-                    disabled
-                    filterable
-                >
+              <el-form-item label="申请人">
+                <el-select v-model="data['requester']" disabled filterable>
                   <el-option
-                      v-for="item in store.getters[
-											'user_list'
-										]"
-                      :label="item.id + ' - ' + item.name"
-                      :value="item.id"
+                      :label="props.data['requester'] + ' - ' + props.data['requester_name']"
+                      :value="props.data['requester']"
                   ></el-option>
                 </el-select>
               </el-form-item>
@@ -96,7 +87,9 @@
             <td>
               <el-form-item label="审核小组">
                 <el-select v-model="props.data['applicant_id']" disabled filterable>
-                  <el-option v-for="item in store.getters['expert_group']" :label="item['tag']" :value="item['id']"
+                  <el-option
+                      :label=" props.data['applicant_id'] + ' - ' + props.data['applicant_tag']"
+                      :value="props.data['applicant_id']"
                   >
                   </el-option>
                 </el-select>
@@ -114,12 +107,12 @@
 </template>
 
 <script lang="ts" setup>
-import {useStore} from 'vuex';
+import {useStore} from 'vuex'
 
-const store = useStore();
+const store = useStore()
 const props = defineProps({
   data: Object,
-});
+})
 </script>
 
 <style lang="scss" scoped>
